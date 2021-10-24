@@ -3,6 +3,9 @@ import numpy
 import math
 import struct
 import time
+import tkinter as tk
+from tkinter import *
+from tkinter import ttk
 
 SR = 44100  # Sample Rate
 
@@ -121,19 +124,39 @@ def base_to_freq(note, octave):
 def note_to_freq(diff, base):
     return (base * pow(2, (rm_micro(int(diff)-1) / 12)))
 
-def play_sequence(input, base):
+def play_sequence(input, base, mode):
     for i in range(len(input)):
         char = az_to_br(input[i])
         for j in range(2):
             if(char[j] == '0'):
                 time.sleep(0.1)
             else:
-                play_sound("square", note_to_freq(int(char[j]), base), 0.8, 100)
+                play_sound(mode, note_to_freq(int(char[j]), base), 0.8, 100)
         time.sleep(0.1)
 
-# Main test
-baseParam = "A2"
-message = "hello world"
+MODES = ["sine", "square", "triangle"]
 
-base = base_to_freq(baseParam[0], int(baseParam[1]))
-play_sequence(message, base)
+def launch_seq():
+    play_sequence(plainTxt.get(), base_to_freq('A', octave.get()), "square")
+
+root = tk.Tk()
+root.iconbitmap('app.ico')
+root.title('Cryptune')
+root.geometry("218x140")
+
+tk.Label(text="Mode: ").place(x=2, y=4)
+optMode = tk.StringVar(root)
+optMode.set(MODES[0])
+ddMode = tk.OptionMenu(root, optMode, *MODES)
+ddMode.pack()
+ddMode.place(x=50, y=2, height=24)
+
+tk.Label(text="Octave:").place(x=2, y=28)
+octave = tk.Entry(root).place(x=56, y=30, width=24)
+
+tk.Label(text="Plaintext:").place(x=2, y=52)
+plainTxt = tk.Entry(root).place(x=64, y=54, width=64)
+
+tk.Button(text="Go!", command=launch_seq).place(x=50, y=110)
+tk.Button(text="Quit", command=root.destroy).place(x=130, y=110)
+root.mainloop()
