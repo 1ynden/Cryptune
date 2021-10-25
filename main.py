@@ -3,13 +3,18 @@ import numpy
 import math
 import struct
 import time
+import sys
+import scipy.io.wavfile as wav
+from os.path import exists
 
 SR = 44100  # Sample Rate
 
-def play_sound(type, frequency, volume, duration):
-   generate_sound(type, frequency, volume, duration)
+MODES = ["sine", "square", "triangle"]
 
-def generate_sound(type, frequency, volume, duration):
+def play_sound(type, frequency, volume, duration, fname):
+   generate_sound(type, frequency, volume, duration, fname)
+
+def generate_sound(type, frequency, volume, duration, fname):
     outbuf = numpy.random.normal(loc=0, scale=1, size=int(float(duration / 1000.0)*SR))
 
     dur = int(SR * float(duration / 1000.0))
@@ -42,13 +47,16 @@ def generate_sound(type, frequency, volume, duration):
                 if theta <= 0:
                     rising = True
 
-    p = pyaudio.PyAudio()
-    stream = p.open(format=pyaudio.paFloat32, channels=1, rate=SR, output=True)
-    data = b''.join(struct.pack('f', samp) for samp in outbuf)
-    stream.write(data)
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
+    if(fname == "null"):
+        p = pyaudio.PyAudio()
+        stream = p.open(format=pyaudio.paFloat32, channels=1, rate=SR, output=True)
+        data = b''.join(struct.pack('f', samp) for samp in outbuf)
+        stream.write(data)
+        stream.stop_stream()
+        stream.close()
+        p.terminate()
+    else:
+        wav.write(fname, SR, outbuf)
 
 def az_to_br(char):
     char = char.lower()
@@ -121,19 +129,80 @@ def base_to_freq(note, octave):
 def note_to_freq(diff, base):
     return (base * pow(2, (rm_micro(int(diff)-1) / 12)))
 
-def play_sequence(input, base):
+def play_sequence(input, base, type, fname):
     for i in range(len(input)):
         char = az_to_br(input[i])
         for j in range(2):
             if(char[j] == '0'):
                 time.sleep(0.1)
             else:
-                play_sound("square", note_to_freq(int(char[j]), base), 0.8, 100)
+                play_sound(type, note_to_freq(int(char[j]), base), 0.8, 100, fname)
         time.sleep(0.1)
 
-# Main test
-baseParam = "A2"
-message = "hello world"
+def welcome():
+    print("  ______     ______     __  __     ______   ______   __  __     __   __     ______    ")
+    print(" /\  ___\   /\  == \   /\ \_\ \   /\  == \ /\__  _\ /\ \/\ \   /\ *-.\ \   /\  ___\   ")
+    print(" \ \ \____  \ \  __<   \ \____ \  \ \  _-/ \/_/\ \/ \ \ \_\ \  \ \ \-.  \  \ \  __\_  ")
+    print("  \ \_____\  \ \_\ \_\  \/\_____\  \ \_\      \ \_\  \ \_____\  \ \_\\*\__\  \ \_____\ ")
+    print("   \/_____/   \/_/ /_/   \/_____/   \/_/       \/_/   \/_____/   \/_/ \/_/   \/_____/ ")
+    print("\n Welcome to Cryptune. The command line arguments (which come after \"main.py\") are as follows: \n")
+    print("\t -d: Force run with default settings.")
+    print("\t -e: Export to wav file. Duplicates will be numbered.")
+    print("\t -m: Set message. Default = hello world")
+    print("\t -o: Manually set octave. Default = 2")
+    print("\t -w: Set wave type. Default = sine; Options = sine, square, triangle")
+    print("\n For more detailed information, visit https://github.com/1ynden/Cryptune")
 
-base = base_to_freq(baseParam[0], int(baseParam[1]))
-play_sequence(message, base)
+# Fallback values for entry
+baseParam = 2
+wave = "square"
+message = "hello world"
+export = "null"
+
+if(len(sys.argv) != 1):
+    if(sys.argv[1] == "-h"):
+        welcome()
+    elif(sys.argv[1] == "-d"):
+        play_sequence(message, base_to_freq('A', baseParam), wave, export)
+    else:
+        while(len(sys.argv) > 2):
+            if(sys.argv[1] == "-o"):
+                if(int(sys.argv[2]) > 0):
+                    if(int(sys.argv[2]) < 7):
+                        baseParam = int(sys.argv[2])
+                    else:
+                        print("Octave can't (shouldn't) be over 7. Defaulting to 7.")
+                        baseParam = 7
+                else:
+                    print("The octave cannot be 0 or lower. Defaulting to 1.")
+                    baseParam = 1
+            elif(sys.argv[1] == "-m"):
+                message = sys.argv[2]
+            elif(sys.argv[1] == "-w"):
+                if(sys.argv[2] in MODES):
+                    wave = sys.argv[2]
+                else:
+                    print("Invalid wave type. Defaulting to square.")
+                    wave = "square"
+            elif(sys.argv[1] == "-e"):
+                if(exists(sys.argv[2] + ".wav")):
+                    vnum = 1
+                    export = sys.argv[2] + "(1).wav"
+                    while(exists(export)):
+                        vnum += 1
+                        export = sys.argv[2] + ("(%d)" %  vnum) + ".wav"
+                else:
+                    export = sys.argv[2] + ".wav"
+            else:
+                print("Invalid argument token entered. Type \"python main.py\" to see proper arguments.")
+            del sys.argv[1]
+            del sys.argv[1]
+        if(len(sys.argv) == 2):
+            print("An invalid number of arguments were entered. \n Proceeding with those that have been processed, otherwise default settings.")
+        play_sequence(message, base_to_freq('A', baseParam), wave, export)
+else:
+    welcome()
+
+
+#base = base_to_freq(baseParam[0], int(baseParam[1]))
+#play_sequence(message, base)
