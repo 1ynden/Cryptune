@@ -150,7 +150,7 @@ def welcome():
     print("\t -e: Export to wav file. Duplicates will be numbered.")
     print("\t -m: Set message. Default = hello world")
     print("\t -o: Manually set octave. Default = 2")
-    print("\t -w: Set wave type. Default = sine; Options = sine, square, triangle")
+    print("\t -w: Set wave type. Default = square; Options = sine, square, triangle")
     print("\n For more detailed information, visit https://github.com/1ynden/Cryptune")
 
 # Fallback values for entry
