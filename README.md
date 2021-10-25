@@ -25,9 +25,7 @@ Let's split this letter into two columns, with the left column having two dots a
 
 Next, let's number these dots: 1, 2, and 3, from top to bottom. So, the left column has dots 2 and 3, while the right column has only dot 2.
 
-Now, let's call spaces WITH dots 'ON' and spaces WITHOUT dots 'OFF', or 0 and 1 respectively, and once again represent our columns from top to bottom.
-
-Column 1 is then "110", and Column 2 is subsequently "010". This is now binary representation. The encoded pair for 'H' is 62.
+Now, let's call spaces WITH dots 'ON' and spaces WITHOUT dots 'OFF', or 1 and 0 respectively, and once again represent our columns from top to bottom. Column 1 is then "110", and Column 2 is subsequently "010". This is now binary representation. The encoded pair for 'H' is 62.
 
 The following is the entire Grade-1 Braille alphabet, which all characters follow.
 
@@ -47,7 +45,8 @@ So, given a base note, an encoded column can be any note within a single octave'
 > The program will play the notes: F2 B2
 
 ## **How to convert note information into sound (Audio Engineering)?**
-Fortunately, sound in relation to tone is pretty simple. The frequencies for each note are set values, which can be found in a chart [here.](http://techlib.com/reference/musical_note_frequencies.htm)
+Fortunately, sound in relation to tone is pretty simple. The frequencies for each note are set values, which can be found in a chart
+[here](http://techlib.com/reference/musical_note_frequencies.htm).
 
 However, instead of mapping these all in the program, we can just store a single baseline note, since the entire table can be built around a single value. 
 The value you choose could be any value in this table, but to keep it simple, I chose A1 which has a frequency of 55.0 Hz. Some constant rules for generating
@@ -60,3 +59,32 @@ tones in this chart are as follows:
 
 There are a number of wave types which can be generated from this calculated frequency, which currently includes **sine, square, and triangle**.
 The frequency is the period of these functions, which generates the sound at the proper tones when played back.
+
+## **Getting Started**
+Download the **main** branch of Cryptune to your local machine.
+
+Before you can run Cryptune, you need to have a number of dependencies. Firstly, Python, of course. Grab the latest version for your machine 
+[here](https://www.python.org/downloads/). If you didn't already have Python, you should add both it and pip to your PATH file.
+
+Once you have both Python and pip installed, open a cmd or powershell window and navigate to wherever you have downloaded this repository to.
+
+Then, enter the following command:
+
+```
+pip install -r packages
+```
+
+Once you have done this, you're set to begin using the program. To see all the options, run the command:
+
+```
+python main.py
+```
+
+You will be greeted by a welcome screen which explains any command-line arguments that you can add. 
+
+Enter a combination of these arguments to run the program. For example, you could try:
+``` 
+python main.py -m "foo bar" -o 3 -w square
+```
+
+Remember to put "quotation marks" around any string entry which contains a space!
